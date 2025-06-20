@@ -3,6 +3,7 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const app = express();
 const PORT = 3000;
+const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
 // Middleware
 app.use(cors());
@@ -26,7 +27,7 @@ app.post("/analyze", async (req, res) => {
     const response = await fetch("https://api-inference.huggingface.co/models/j-hartmann/emotion-english-distilroberta-base", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
+        Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ inputs: text })
