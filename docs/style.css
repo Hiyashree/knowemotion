@@ -1,0 +1,238 @@
+/* 🌙 Theme Variables */
+:root {
+  --bg-color: #f5f3ff;
+  --text-color: #3b0764;
+  --card-bg: #fff;
+}
+
+/* Reset default margins */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Base Body */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(135deg, #f5e6fa, #d7effb);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  position: relative;
+  transition: all 0.4s ease;
+}
+
+/* Dark Theme Mode */
+body.dark {
+  --bg-color: #302943;
+  --text-color: #e0d4f7;
+  --card-bg: #302850;
+  background: linear-gradient(135deg, #2c3e50, #4ca1af);
+  color: #ffffff;
+}
+
+/* Container */
+.container {
+  max-width: 600px;
+  width: 100%;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 1.5s ease;
+}
+
+/* Container in Dark Mode */
+body.dark .container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+}
+
+/* Headings */
+h1 {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  color: #4a4a4a;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  height: 150px;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-size: 1em;
+  background: rgba(255, 255, 255, 0.6);
+  color: inherit;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Textarea in Dark Mode */
+body.dark textarea {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Buttons */
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+/* Button Hover */
+button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Button in Dark Mode */
+body.dark button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Dark Mode Button Hover */
+body.dark button:hover {
+  background: linear-gradient(135deg, #ff758c, #ff7eb3);
+}
+
+/* Special Delete Entry Button */
+button.delete-entry {
+  background-color: #ff6666;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Result Box */
+#resultBox {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 1rem;
+  border-radius: 15px;
+  display: none;
+  animation: fadeIn 1.5s ease;
+  color: inherit;
+}
+
+/* Result Box in Dark Mode */
+body.dark #resultBox {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Entries Box */
+#entriesBox {
+  background: rgba(255, 255, 255, 0.4);
+  padding: 1rem;
+  border-radius: 15px;
+}
+
+/* Entries List */
+#entriesList {
+  list-style: none;
+  margin-top: 10px;
+}
+
+#entriesList li {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+/* Entries List Item in Dark Mode */
+body.dark #entriesList li {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Form Sections and Result Sections */
+.result, .form-section {
+  background: var(--card-bg);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 0 10px rgba(128, 90, 213, 0.2);
+}
+
+/* Entry Card Hover */
+.entry-card:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 🌗 Toggle Switch Styles */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 26px; width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #86d9d8;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
