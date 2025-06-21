@@ -138,12 +138,23 @@ deleteAllBtn.addEventListener('click', function() {
 });
 
 function createPetal() {
-    const petal = document.createElement("div");
-    petal.classList.add("petal");
-    petal.style.left = Math.random() * 100 + "vw";
-    petal.style.animationDuration = (3 + Math.random() * 5) + "s";
-    document.body.appendChild(petal);
-    setTimeout(() => petal.remove(), 8000);
-  }
-  setInterval(createPetal, 400);
+  const petal = document.createElement("div");
+  petal.classList.add("petal");
+
+  // Random position and size
+  const size = Math.random() * 15 + 10;
+  petal.style.width = `${size}px`;
+  petal.style.height = `${size}px`;
+  petal.style.left = Math.random() * window.innerWidth + "px";
+
+  // Animation randomness
+  petal.style.animationDuration = (3 + Math.random() * 5) + "s";
+  petal.style.opacity = Math.random();
+
+  document.body.appendChild(petal);
+
+  setTimeout(() => petal.remove(), 8000);
+}
+
+setInterval(createPetal, 400);
 
