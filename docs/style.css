@@ -1,8 +1,9 @@
-/* 🌙 Theme Variables */
+/* 🌸 Theme Variables */
 :root {
-  --bg-color: #f5f3ff;
-  --text-color: #3b0764;
-  --card-bg: #fff;
+  --bg-color: #fef6ff;
+  --text-color: #4a0072;
+  --card-bg: #ffffffcc;
+  --glow: 0 0 15px #e0bbff, 0 0 30px #d0aaff;
 }
 
 /* Reset default margins */
@@ -12,10 +13,10 @@
   box-sizing: border-box;
 }
 
-/* Base Body */
+/* 🌸 Body Styling */
 body {
   font-family: 'Poppins', Arial, sans-serif;
-  background: linear-gradient(135deg, #f5e6fa, #d7effb);
+  background: linear-gradient(135deg, #fdf0ff, #e0f7ff);
   background-color: var(--bg-color);
   color: var(--text-color);
   min-height: 100vh;
@@ -24,30 +25,45 @@ body {
   align-items: center;
   justify-content: center;
   padding: 30px;
+  overflow-x: hidden;
   position: relative;
   transition: all 0.4s ease;
 }
 
-/* Dark Theme Mode */
+/* ✨ Dark Mode */
 body.dark {
   --bg-color: #302943;
   --text-color: #e0d4f7;
-  --card-bg: #302850;
+  --card-bg: #392f55bb;
   background: linear-gradient(135deg, #2c3e50, #4ca1af);
   color: #ffffff;
 }
 
-/* Container */
+/* ✨ Stardust Background Texture */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 🌼 Container */
 .container {
   max-width: 600px;
   width: 100%;
   background: var(--card-bg);
   backdrop-filter: blur(10px);
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: var(--glow);
   text-align: center;
-  animation: fadeIn 1.5s ease;
+  animation: fadeIn 2s ease, float 4s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
 }
 
 /* Container in Dark Mode */
@@ -61,7 +77,8 @@ body.dark .container {
 h1 {
   font-size: 2.8rem;
   margin-bottom: 1rem;
-  color: #4a4a4a;
+  color: #a4508b;
+  text-shadow: 0 0 5px #fff0f9, 0 0 10px #d38ce8;
 }
 
 /* Textarea */
@@ -71,84 +88,82 @@ textarea {
   margin-top: 10px;
   padding: 10px;
   border-radius: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid #e3d1ff;
   resize: vertical;
   font-size: 1em;
   background: rgba(255, 255, 255, 0.6);
   color: inherit;
   font-family: 'Poppins', sans-serif;
+  transition: 0.3s ease;
 }
 
-/* Textarea in Dark Mode */
 body.dark textarea {
   background: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+textarea:focus {
+  box-shadow: 0 0 12px #c084fc;
+  outline: none;
 }
 
 /* Buttons */
 button {
   margin: 10px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  background: linear-gradient(135deg, #ffadeb, #a8edea);
   border: none;
   border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1.1rem;
   color: white;
+  box-shadow: 0 0 12px #ffb0f1;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Button Hover */
 button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: scale(1.07);
+  background: linear-gradient(135deg, #c084fc, #fbc2eb);
 }
 
-/* Button in Dark Mode */
+/* Dark Mode Button */
 body.dark button {
   background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
-/* Dark Mode Button Hover */
 body.dark button:hover {
   background: linear-gradient(135deg, #ff758c, #ff7eb3);
 }
 
-/* Special Delete Entry Button */
+/* Delete Entry Button */
 button.delete-entry {
   background-color: #ff6666;
   color: white;
-  border: none;
   padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
 }
 
-/* Result Box */
-#resultBox {
+/* Result & Entry Boxes */
+#resultBox, #entriesBox {
   margin-top: 2rem;
   background: rgba(255, 255, 255, 0.4);
   padding: 1rem;
   border-radius: 15px;
-  display: none;
-  animation: fadeIn 1.5s ease;
+  animation: fadeIn 2s ease;
   color: inherit;
+  box-shadow: var(--glow);
 }
 
-/* Result Box in Dark Mode */
-body.dark #resultBox {
+body.dark #resultBox,
+body.dark #entriesBox {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Entries Box */
-#entriesBox {
-  background: rgba(255, 255, 255, 0.4);
-  padding: 1rem;
-  border-radius: 15px;
-}
-
-/* Entries List */
+/* Entry Items */
 #entriesList {
   list-style: none;
   margin-top: 10px;
@@ -156,37 +171,31 @@ body.dark #resultBox {
 
 #entriesList li {
   background: rgba(255, 255, 255, 0.7);
-  padding: 0.5rem;
-  border-radius: 10px;
-  margin-bottom: 5px;
-  font-size: 0.95rem;
+  padding: 0.7rem;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  box-shadow: 0 0 8px #e0bbff;
+  animation: float 6s ease-in-out infinite;
 }
 
-/* Entries List Item in Dark Mode */
 body.dark #entriesList li {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Form Sections and Result Sections */
-.result, .form-section {
-  background: var(--card-bg);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 0 10px rgba(128, 90, 213, 0.2);
-}
-
-/* Entry Card Hover */
+/* Card Hover */
 .entry-card:hover {
   transform: scale(1.02);
   transition: transform 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 🌗 Toggle Switch Styles */
+/* Toggle Switch */
 .theme-toggle {
   position: fixed;
   top: 20px;
   right: 20px;
+  z-index: 2;
 }
 
 .switch {
@@ -195,13 +204,11 @@ body.dark #entriesList li {
   width: 60px;
   height: 34px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -211,28 +218,53 @@ body.dark #entriesList li {
   transition: .4s;
   border-radius: 34px;
 }
-
 .slider:before {
-  content: "";
+  content: '';
   position: absolute;
   height: 26px; width: 26px;
-  left: 4px;
-  bottom: 4px;
+  left: 4px; bottom: 4px;
   background-color: white;
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .slider {
-  background-color: #86d9d8;
+  background-color: #f8bbd0;
 }
-
 input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Animations */
+/* 🌸 Petal Animation */
+.petal {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background-image: url('images/petal.jpg'); 
+  background-size: cover;
+  opacity: 0.8;
+  animation: fall linear infinite;
+  pointer-events: none;
+  z-index: 99;
+}
+
+/* 🌟 Animations */
 @keyframes fadeIn {
   from {opacity: 0;}
   to {opacity: 1;}
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
 }
