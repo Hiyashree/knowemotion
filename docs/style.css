@@ -239,7 +239,7 @@ input:checked + .slider:before {
   position: fixed;
   width: 20px;
   height: 20px;
-  background-image: url('images/petal.jpg'); 
+  background-image: url('images/mew.png'); 
   background-size: cover;
   opacity: 0.8;
   animation: fall linear infinite;
