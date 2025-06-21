@@ -136,3 +136,14 @@ deleteAllBtn.addEventListener('click', function() {
     document.getElementById('entriesList').innerHTML = '';
     document.getElementById('entriesBox').style.display = 'none';
 });
+
+function createPetal() {
+    const petal = document.createElement("div");
+    petal.classList.add("petal");
+    petal.style.left = Math.random() * 100 + "vw";
+    petal.style.animationDuration = (3 + Math.random() * 5) + "s";
+    document.body.appendChild(petal);
+    setTimeout(() => petal.remove(), 8000);
+  }
+  setInterval(createPetal, 400);
+
