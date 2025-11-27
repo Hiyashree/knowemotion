@@ -10,7 +10,9 @@
   }
 
   try {
-    const response = await fetch("https://knowemotion.onrender.com/analyze", {
+    // Use relative URL for production, or detect the current origin
+    const apiUrl = window.location.origin + "/analyze";
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -20,6 +22,13 @@
 
     const data = await response.json();
     console.log("API Response:", data);
+
+    // Check for error response
+    if (!response.ok || data.error) {
+      console.error("API Error:", data.error || `HTTP ${response.status}`);
+      alert(data.error || `Error: ${response.status} ${response.statusText}`);
+      return;
+    }
 
     if (data.mood && data.quote) {
       moodEl.textContent = data.mood;
@@ -35,12 +44,12 @@
 
       saveToLocalStorage(entry);
     } else {
-      console.error("Invalid response format from API.");
-      alert("Error: Invalid response format.");
+      console.error("Invalid response format from API:", data);
+      alert("Error: Invalid response format. Please try again.");
     }
   } catch (err) {
     console.error("Error:", err);
-    alert("Something went wrong. Is your server running?");
+    alert("Something went wrong. Is your server running? Check the console for details.");
   }
 });
 
@@ -97,6 +106,13 @@ function saveToLocalStorage(entry) {
 // ✅ MOOD EMOJI FUNCTION
 function getMoodEmoji(mood) {
   const map = {
+    joy: "😊",
+    sadness: "😢",
+    anger: "😠",
+    fear: "😰",
+    surprise: "😲",
+    love: "❤️",
+    // Legacy mappings for backwards compatibility
     happy: "😊",
     sad: "😢",
     angry: "😠",
@@ -112,6 +128,13 @@ function getMoodEmoji(mood) {
 // ✅ MOOD COLOR FUNCTION
 function getMoodColor(mood) {
   const map = {
+    joy: "#facc15",
+    sadness: "#60a5fa",
+    anger: "#f87171",
+    fear: "#a78bfa",
+    surprise: "#fcd34d",
+    love: "#fca5a5",
+    // Legacy mappings for backwards compatibility
     happy: "#facc15",
     sad: "#60a5fa",
     angry: "#f87171",
@@ -137,6 +160,7 @@ deleteAllBtn.addEventListener('click', function() {
     document.getElementById('entriesBox').style.display = 'none';
 });
 
+  // 🌸 Falling Petals
 function createPetal() {
   const petal = document.createElement("div");
   petal.classList.add("petal");
