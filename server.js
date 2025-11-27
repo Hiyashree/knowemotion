@@ -32,13 +32,6 @@ if (!HUGGINGFACE_API_TOKEN) {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('docs'));
- // Serve static files from "public" folder
-
-// Serve index.html
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/docs/index.html');
-});
 
 let entries = [];
 
@@ -110,13 +103,10 @@ app.post("/analyze", async (req, res) => {
   try {
     const modelName = "j-hartmann/emotion-english-distilroberta-base";
     
-    // Try router endpoint - multiple possible formats
-    // Format 1: https://router.huggingface.co/models/{model}
-    // Format 2: https://router.huggingface.co/hf-inference/models/{model}
-    // Format 3: https://router.huggingface.co/inference/models/{model}
-    let apiUrl = `https://router.huggingface.co/models/${modelName}`;
+    // Try standard inference API first (most reliable)
+    let apiUrl = `https://api-inference.huggingface.co/models/${modelName}`;
     
-    console.log("Calling Hugging Face API (router):", apiUrl);
+    console.log("Calling Hugging Face API:", apiUrl);
     console.log("Token present:", HUGGINGFACE_API_TOKEN ? "Yes (length: " + HUGGINGFACE_API_TOKEN.length + ")" : "No");
     
     const response = await fetch(apiUrl, {
@@ -132,13 +122,13 @@ app.post("/analyze", async (req, res) => {
       let errorText;
       try {
         errorText = await response.text();
-        console.error("HTTP Error (first attempt):", response.status, errorText);
+        console.error("HTTP Error (standard API):", response.status, errorText);
         
-        // If 404, try the /hf-inference format
-        if (response.status === 404) {
-          console.log("Trying alternative router format with /hf-inference...");
-          const altUrl = `https://router.huggingface.co/hf-inference/models/${modelName}`;
-          const altResponse = await fetch(altUrl, {
+        // If we get a redirect message or 404, try router endpoint
+        if (response.status === 404 || errorText.includes("router.huggingface.co")) {
+          console.log("Trying router endpoint...");
+          const routerUrl = `https://router.huggingface.co/models/${modelName}`;
+          const routerResponse = await fetch(routerUrl, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
@@ -147,14 +137,13 @@ app.post("/analyze", async (req, res) => {
             body: JSON.stringify({ inputs: text })
           });
           
-          if (altResponse.ok) {
-            const altResult = await altResponse.json();
-            // Process the successful response
-            return processEmotionResponse(altResult, text, res);
+          if (routerResponse.ok) {
+            const routerResult = await routerResponse.json();
+            return processEmotionResponse(routerResult, text, res);
           } else {
-            const altErrorText = await altResponse.text();
-            console.error("HTTP Error (alternative):", altResponse.status, altErrorText);
-            errorText = altErrorText;
+            const routerErrorText = await routerResponse.text();
+            console.error("HTTP Error (router):", routerResponse.status, routerErrorText);
+            errorText = routerErrorText;
           }
         }
         
@@ -186,6 +175,14 @@ app.post("/analyze", async (req, res) => {
 // Get all stored entries (optional frontend usage)
 app.get('/entries', (req, res) => {
   res.json(entries);
+});
+
+// Serve static files AFTER API routes (to avoid conflicts)
+app.use(express.static('docs'));
+
+// Serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/docs/index.html');
 });
 
 app.listen(PORT, '0.0.0.0', () => {
