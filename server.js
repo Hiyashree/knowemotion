@@ -5,8 +5,14 @@ require('dotenv').config();
 
 const app = express();
 // Use Render's PORT environment variable, fallback to 3000 for local development
-const PORT = process.env.PORT ; 
-const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN ;
+const PORT = process.env.PORT || 3000; 
+const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
+
+// Validate API token
+if (!HUGGINGFACE_API_TOKEN) {
+  console.error("⚠️  WARNING: HUGGINGFACE_API_TOKEN is not set!");
+  console.error("Please set it in your environment variables or .env file");
+}
 
 // Middleware
 app.use(cors());
@@ -26,13 +32,22 @@ app.post("/analyze", async (req, res) => {
   const text = req.body.text;
   console.log("Analyzing text:", text); // Log incoming request
 
+  // Check if API token is set
+  if (!HUGGINGFACE_API_TOKEN) {
+    console.error("HUGGINGFACE_API_TOKEN is not configured");
+    return res.status(500).json({ 
+      error: "API token not configured. Please set HUGGINGFACE_API_TOKEN environment variable." 
+    });
+  }
+
   try {
-    // Use the new router endpoint format
+    // Use the inference API endpoint (router redirects automatically)
     const modelName = "j-hartmann/emotion-english-distilroberta-base";
-    // Router endpoint format: https://router.huggingface.co/hf-inference/models/{model}
-    const apiUrl = `https://router.huggingface.co/hf-inference/models/${modelName}`;
+    // Try standard inference API endpoint first
+    const apiUrl = `https://api-inference.huggingface.co/models/${modelName}`;
     
     console.log("Calling Hugging Face API:", apiUrl);
+    console.log("Token present:", HUGGINGFACE_API_TOKEN ? "Yes (length: " + HUGGINGFACE_API_TOKEN.length + ")" : "No");
     
     const response = await fetch(apiUrl, {
       method: "POST",
