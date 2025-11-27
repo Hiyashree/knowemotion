@@ -42,6 +42,59 @@ app.get('/', (req, res) => {
 
 let entries = [];
 
+// Helper function to process emotion response
+function processEmotionResponse(result, text, res) {
+  // ✅ Model still loading or error from HF
+  if (result.error) {
+    console.error("Hugging Face model error:", result.error);
+    return res.status(503).json({ error: "The model is still loading or unavailable. Please try again in a moment." });
+  }
+
+  // Handle different response formats
+  let emotions;
+  if (Array.isArray(result) && result.length > 0) {
+    // Format: [[{label: "joy", score: 0.9}, ...]]
+    emotions = Array.isArray(result[0]) ? result[0] : result;
+  } else if (result[0] && Array.isArray(result[0])) {
+    emotions = result[0];
+  } else {
+    console.error("Unexpected API format:", result);
+    return res.status(500).json({ error: "Unexpected API response format. Please try again." });
+  }
+
+  // ✅ Validate expected format
+  if (!Array.isArray(emotions) || emotions.length === 0) {
+    console.error("Invalid emotions array:", emotions);
+    return res.status(500).json({ error: "Invalid response format from emotion analysis." });
+  }
+
+  const topEmotion = emotions.reduce((a, b) => (a.score > b.score ? a : b)).label;
+
+  const quotes = {
+    joy: "Let your smile change the world.",
+    sadness: "It's okay to feel down — tomorrow is a new day 💙",
+    anger: "Breathe. You are in control of your peace.",
+    fear: "You've survived 100% of your worst days so far. You've got this.",
+    surprise: "Life has twists — enjoy the unexpected 🌈",
+    love: "You are loved, even when it's quiet 🤍"
+  };
+
+  const responseData = {
+    mood: topEmotion,
+    quote: quotes[topEmotion.toLowerCase()] || "Stay strong, beautiful soul ✨"
+  };
+
+  entries.push({
+    text,
+    mood: topEmotion,
+    quote: responseData.quote,
+    timestamp: new Date().toISOString()
+  });
+
+  return res.json(responseData);
+}
+app.use(express.static('docs'));
+
 // Sentiment analysis route
 app.post("/analyze", async (req, res) => {
   const text = req.body.text;
@@ -58,10 +111,13 @@ app.post("/analyze", async (req, res) => {
   try {
     const modelName = "j-hartmann/emotion-english-distilroberta-base";
     
-    // Use the inference API endpoint (works with valid token)
-    const apiUrl = `https://api-inference.huggingface.co/models/${modelName}`;
+    // Try router endpoint - multiple possible formats
+    // Format 1: https://router.huggingface.co/models/{model}
+    // Format 2: https://router.huggingface.co/hf-inference/models/{model}
+    // Format 3: https://router.huggingface.co/inference/models/{model}
+    let apiUrl = `https://router.huggingface.co/models/${modelName}`;
     
-    console.log("Calling Hugging Face API:", apiUrl);
+    console.log("Calling Hugging Face API (router):", apiUrl);
     console.log("Token present:", HUGGINGFACE_API_TOKEN ? "Yes (length: " + HUGGINGFACE_API_TOKEN.length + ")" : "No");
     
     const response = await fetch(apiUrl, {
@@ -77,7 +133,32 @@ app.post("/analyze", async (req, res) => {
       let errorText;
       try {
         errorText = await response.text();
-        console.error("HTTP Error:", response.status, errorText);
+        console.error("HTTP Error (first attempt):", response.status, errorText);
+        
+        // If 404, try the /hf-inference format
+        if (response.status === 404) {
+          console.log("Trying alternative router format with /hf-inference...");
+          const altUrl = `https://router.huggingface.co/hf-inference/models/${modelName}`;
+          const altResponse = await fetch(altUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ inputs: text })
+          });
+          
+          if (altResponse.ok) {
+            const altResult = await altResponse.json();
+            // Process the successful response
+            return processEmotionResponse(altResult, text, res);
+          } else {
+            const altErrorText = await altResponse.text();
+            console.error("HTTP Error (alternative):", altResponse.status, altErrorText);
+            errorText = altErrorText;
+          }
+        }
+        
         // Try to parse as JSON for better error message
         try {
           const errorJson = JSON.parse(errorText);
@@ -95,54 +176,8 @@ app.post("/analyze", async (req, res) => {
     const result = await response.json();
     console.log("API Response:", JSON.stringify(result, null, 2));
 
-    // ✅ Model still loading or error from HF
-    if (result.error) {
-      console.error("Hugging Face model error:", result.error);
-      return res.status(503).json({ error: "The model is still loading or unavailable. Please try again in a moment." });
-    }
-
-    // Handle different response formats
-    let emotions;
-    if (Array.isArray(result) && result.length > 0) {
-      // Format: [[{label: "joy", score: 0.9}, ...]]
-      emotions = Array.isArray(result[0]) ? result[0] : result;
-    } else if (result[0] && Array.isArray(result[0])) {
-      emotions = result[0];
-    } else {
-      console.error("Unexpected API format:", result);
-      return res.status(500).json({ error: "Unexpected API response format. Please try again." });
-    }
-
-    // ✅ Validate expected format
-    if (!Array.isArray(emotions) || emotions.length === 0) {
-      console.error("Invalid emotions array:", emotions);
-      return res.status(500).json({ error: "Invalid response format from emotion analysis." });
-    }
-
-    const topEmotion = emotions.reduce((a, b) => (a.score > b.score ? a : b)).label;
-
-    const quotes = {
-      joy: "Let your smile change the world.",
-      sadness: "It's okay to feel down — tomorrow is a new day 💙",
-      anger: "Breathe. You are in control of your peace.",
-      fear: "You’ve survived 100% of your worst days so far. You’ve got this.",
-      surprise: "Life has twists — enjoy the unexpected 🌈",
-      love: "You are loved, even when it’s quiet 🤍"
-    };
-
-    const responseData = {
-      mood: topEmotion,
-      quote: quotes[topEmotion.toLowerCase()] || "Stay strong, beautiful soul ✨"
-    };
-
-    entries.push({
-      text,
-      mood: topEmotion,
-      quote: responseData.quote,
-      timestamp: new Date().toISOString()
-    });
-
-    res.json(responseData);
+    // Process the successful response
+    return processEmotionResponse(result, text, res);
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ error: "Something went wrong with emotion analysis." });
