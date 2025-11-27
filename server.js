@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+require('dotenv').config();
+
 const app = express();
-const PORT = 3000;
-const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+// Use Render's PORT environment variable, fallback to 3000 for local development
+const PORT = process.env.PORT ; 
+const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN ;
 
 // Middleware
 app.use(cors());
@@ -85,6 +88,7 @@ app.post("/analyze", async (req, res) => {
       console.error("Invalid emotions array:", emotions);
       return res.status(500).json({ error: "Invalid response format from emotion analysis." });
     }
+
     const topEmotion = emotions.reduce((a, b) => (a.score > b.score ? a : b)).label;
 
     const quotes = {
@@ -120,10 +124,6 @@ app.get('/entries', (req, res) => {
   res.json(entries);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
-
-
-
-
