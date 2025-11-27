@@ -44,7 +44,7 @@ app.post("/analyze", async (req, res) => {
     // Use the inference API endpoint (router redirects automatically)
     const modelName = "j-hartmann/emotion-english-distilroberta-base";
     // Try standard inference API endpoint first
-    const apiUrl = `https://api-inference.huggingface.co/models/${modelName}`;
+    const apiUrl = `https://router.huggingface.co/models/${modelName}`;
     
     console.log("Calling Hugging Face API:", apiUrl);
     console.log("Token present:", HUGGINGFACE_API_TOKEN ? "Yes (length: " + HUGGINGFACE_API_TOKEN.length + ")" : "No");
@@ -142,3 +142,4 @@ app.get('/entries', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
