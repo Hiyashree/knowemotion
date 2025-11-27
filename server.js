@@ -24,16 +24,43 @@ app.post("/analyze", async (req, res) => {
   console.log("Analyzing text:", text); // Log incoming request
 
   try {
-    const response = await fetch("https://router.huggingface.co/v1/inference/SamLowe/roberta-base-go-emotions", {
+    // Use the new router endpoint format
+    const modelName = "j-hartmann/emotion-english-distilroberta-base";
+    // Router endpoint format: https://router.huggingface.co/hf-inference/models/{model}
+    const apiUrl = `https://router.huggingface.co/hf-inference/models/${modelName}`;
+    
+    console.log("Calling Hugging Face API:", apiUrl);
+    
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
+        Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ inputs: text })
     });
 
+    if (!response.ok) {
+      let errorText;
+      try {
+        errorText = await response.text();
+        console.error("HTTP Error:", response.status, errorText);
+        // Try to parse as JSON for better error message
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error("Error JSON:", errorJson);
+          errorText = errorJson.error || errorJson.message || errorText;
+        } catch (e) {
+          // Not JSON, use text as is
+        }
+      } catch (e) {
+        errorText = `HTTP ${response.status} ${response.statusText}`;
+      }
+      return res.status(response.status).json({ error: `API request failed: ${errorText}` });
+    }
+
     const result = await response.json();
+    console.log("API Response:", JSON.stringify(result, null, 2));
 
     // ✅ Model still loading or error from HF
     if (result.error) {
@@ -41,14 +68,23 @@ app.post("/analyze", async (req, res) => {
       return res.status(503).json({ error: "The model is still loading or unavailable. Please try again in a moment." });
     }
 
-    const emotions = result[0];
-
-    // ✅ Validate expected format
-    if (!Array.isArray(emotions)) {
+    // Handle different response formats
+    let emotions;
+    if (Array.isArray(result) && result.length > 0) {
+      // Format: [[{label: "joy", score: 0.9}, ...]]
+      emotions = Array.isArray(result[0]) ? result[0] : result;
+    } else if (result[0] && Array.isArray(result[0])) {
+      emotions = result[0];
+    } else {
       console.error("Unexpected API format:", result);
-      throw new Error("Unexpected API response format");
+      return res.status(500).json({ error: "Unexpected API response format. Please try again." });
     }
 
+    // ✅ Validate expected format
+    if (!Array.isArray(emotions) || emotions.length === 0) {
+      console.error("Invalid emotions array:", emotions);
+      return res.status(500).json({ error: "Invalid response format from emotion analysis." });
+    }
     const topEmotion = emotions.reduce((a, b) => (a.score > b.score ? a : b)).label;
 
     const quotes = {
@@ -87,6 +123,7 @@ app.get('/entries', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
 
 
 
