@@ -103,10 +103,10 @@ app.post("/analyze", async (req, res) => {
   try {
     const modelName = "j-hartmann/emotion-english-distilroberta-base";
     
-    // Try standard inference API first (most reliable)
-    let apiUrl = `https://api-inference.huggingface.co/models/${modelName}`;
+    // Use ONLY router endpoint
+    let apiUrl = `https://router.huggingface.co/models/${modelName}`;
     
-    console.log("Calling Hugging Face API:", apiUrl);
+    console.log("Calling Hugging Face API (router only):", apiUrl);
     console.log("Token present:", HUGGINGFACE_API_TOKEN ? "Yes (length: " + HUGGINGFACE_API_TOKEN.length + ")" : "No");
     
     const response = await fetch(apiUrl, {
@@ -122,30 +122,7 @@ app.post("/analyze", async (req, res) => {
       let errorText;
       try {
         errorText = await response.text();
-        console.error("HTTP Error (standard API):", response.status, errorText);
-        
-        // If we get a redirect message or 404, try router endpoint
-        if (response.status === 404 || errorText.includes("router.huggingface.co")) {
-          console.log("Trying router endpoint...");
-          const routerUrl = `https://router.huggingface.co/models/${modelName}`;
-          const routerResponse = await fetch(routerUrl, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ inputs: text })
-          });
-          
-          if (routerResponse.ok) {
-            const routerResult = await routerResponse.json();
-            return processEmotionResponse(routerResult, text, res);
-          } else {
-            const routerErrorText = await routerResponse.text();
-            console.error("HTTP Error (router):", routerResponse.status, routerErrorText);
-            errorText = routerErrorText;
-          }
-        }
+        console.error("HTTP Error:", response.status, errorText);
         
         // Try to parse as JSON for better error message
         try {
