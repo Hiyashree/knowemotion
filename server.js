@@ -24,7 +24,7 @@ app.post("/analyze", async (req, res) => {
   console.log("Analyzing text:", text); // Log incoming request
 
   try {
-    const response = await fetch("https://router.huggingface.co/v1/inference/j-hartmann/emotion-english-distilroberta-base", {
+    const response = await fetch("https://router.huggingface.co/v1/inference/SamLowe/roberta-base-go-emotions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
@@ -87,5 +87,6 @@ app.get('/entries', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
 
 
